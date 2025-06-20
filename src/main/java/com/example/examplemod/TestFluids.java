@@ -22,9 +22,9 @@ public class TestFluids {
 
 
 
-    public static final DeferredHolder<Fluid, Fluid> LIFE_ESSENCE_FLUID_FLOWING = FLUIDS.register("env_flowing", resourceLocation -> new BaseFlowingFluid.Flowing(new BaseFlowingFluid.Properties(ETFluidTypes.ENV, ENV_STILL, ENV_FLOWING)
-            .slopeFindDistance(2).levelDecreasePerBlock(2)));
-    public static final DeferredHolder<Fluid, Fluid> LIFE_ESSENCE_FLUID_STILL = FLUIDS.register("env", resourceLocation -> new BaseFlowingFluid.Source(ETFluids.ENV_PROPERTIES));
+    //public static final DeferredHolder<Fluid, Fluid> LIFE_ESSENCE_FLUID_FLOWING = FLUIDS.register("env_flowing", resourceLocation -> new BaseFlowingFluid.Flowing(new BaseFlowingFluid.Properties(ETFluidTypes.ENV, ENV_STILL, ENV_FLOWING)
+     //       .slopeFindDistance(2).levelDecreasePerBlock(2)));
+    //public static final DeferredHolder<Fluid, Fluid> LIFE_ESSENCE_FLUID_STILL = FLUIDS.register("env", resourceLocation -> new BaseFlowingFluid.Source(ETFluids.ENV_PROPERTIES));
 
     public static void registerClientExtensionsEvent(RegisterClientExtensionsEvent event) {
         event.registerFluidType(new IClientFluidTypeExtensions() {

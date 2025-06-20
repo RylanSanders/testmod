@@ -76,6 +76,7 @@ public class ExampleMod
         // Register the commonSetup method for modloading
         modEventBus.addListener(this::commonSetup);
 
+
         // Register the Deferred Register to the mod event bus so blocks get registered
         BLOCKS.register(modEventBus);
         // Register the Deferred Register to the mod event bus so items get registered
@@ -100,7 +101,7 @@ public class ExampleMod
     {
         // Some common setup code
         LOGGER.info("HELLO FROM COMMON SETUP");
-
+        NeoForge.EVENT_BUS.register(new KeyEventHandler());
         if (Config.logDirtBlock)
             LOGGER.info("DIRT BLOCK >> {}", BuiltInRegistries.BLOCK.getKey(Blocks.DIRT));
 
