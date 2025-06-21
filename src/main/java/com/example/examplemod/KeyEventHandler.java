@@ -3,6 +3,7 @@ package com.example.examplemod;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.food.FoodData;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
@@ -29,9 +30,6 @@ public class KeyEventHandler {
     public void KeyEvent(InputEvent.Key event) {
         Player player = Minecraft.getInstance().player;
         if (player == null) return;
-        //if (StickUtil.holdingStick(player) == null) return;
-
-        //LOGGER.info("Input!" + event.getKey());
 
     }
 
@@ -53,37 +51,33 @@ public class KeyEventHandler {
 
         List<BlockPos> toRemoveBlocks = new ArrayList<BlockPos>();
         toRemoveBlocks.add(pos);
-        SearchForSameBlock(toRemoveBlocks, state, pos, level);
-        toRemoveBlocks.forEach(p->level.destroyBlock(p, true));
-    }
+        int BLOCKS_PER_FOOD = 5;
+        FoodData foodData = player.getFoodData();
 
-    private void SearchForSameBlock(List<BlockPos> toRemoveBlocks, BlockState blockType, BlockPos previousBlockPos, Level level) {
-        if (toRemoveBlocks.size() > 50) {
+        int maxBlocksToBreak = (int)((foodData.getFoodLevel()+foodData.getSaturationLevel()) * BLOCKS_PER_FOOD);
+        SearchForSameBlock(toRemoveBlocks, state, pos, level,maxBlocksToBreak);
+        toRemoveBlocks.forEach(p->level.destroyBlock(p, true));
+
+        int removedFoodData = toRemoveBlocks.size()/BLOCKS_PER_FOOD ;
+        if(removedFoodData<foodData.getSaturationLevel()){
+            //Saturation covers the cost
+            foodData.setSaturation(foodData.getSaturationLevel()-removedFoodData);
+        }else{
+            //Need to consume food as well
+            foodData.setFoodLevel((int)(foodData.getFoodLevel()-(removedFoodData-foodData.getSaturationLevel())));
+            foodData.setSaturation(0);
+
+        }
+    }
+    private void SearchForSameBlock(List<BlockPos> toRemoveBlocks, BlockState blockType, BlockPos previousBlockPos, Level level, int maxBlocksToDestroy) {
+        if (toRemoveBlocks.size() > maxBlocksToDestroy) {
             return;
         }
-        if (level.getBlockState(previousBlockPos.above()) == blockType && !toRemoveBlocks.contains(previousBlockPos.above())) {
-            toRemoveBlocks.add(previousBlockPos.above());
-            SearchForSameBlock(toRemoveBlocks, blockType, previousBlockPos.above(), level);
-        }
-        if (level.getBlockState(previousBlockPos.below()) == blockType && !toRemoveBlocks.contains(previousBlockPos.below())) {
-            toRemoveBlocks.add(previousBlockPos.below());
-            SearchForSameBlock(toRemoveBlocks, blockType, previousBlockPos.below(), level);
-        }
-        if (level.getBlockState(previousBlockPos.east()) == blockType && !toRemoveBlocks.contains(previousBlockPos.east())) {
-            toRemoveBlocks.add(previousBlockPos.east());
-            SearchForSameBlock(toRemoveBlocks, blockType, previousBlockPos.east(), level);
-        }
-        if (level.getBlockState(previousBlockPos.west()) == blockType && !toRemoveBlocks.contains(previousBlockPos.west())) {
-            toRemoveBlocks.add(previousBlockPos.west());
-            SearchForSameBlock(toRemoveBlocks, blockType, previousBlockPos.west(), level);
-        }
-        if (level.getBlockState(previousBlockPos.north()) == blockType && !toRemoveBlocks.contains(previousBlockPos.north())) {
-            toRemoveBlocks.add(previousBlockPos.north());
-            SearchForSameBlock(toRemoveBlocks, blockType, previousBlockPos.north(), level);
-        }
-        if (level.getBlockState(previousBlockPos.south()) == blockType && !toRemoveBlocks.contains(previousBlockPos.south())) {
-            toRemoveBlocks.add(previousBlockPos.south());
-            SearchForSameBlock(toRemoveBlocks, blockType, previousBlockPos.south(), level);
+        for(BlockPos pos : GetSideBlocks(previousBlockPos)){
+            if (level.getBlockState(pos).getBlock() == blockType.getBlock() && !toRemoveBlocks.contains(pos)) {
+                toRemoveBlocks.add(pos);
+                SearchForSameBlock(toRemoveBlocks, blockType, pos, level,maxBlocksToDestroy);
+            }
         }
     }
 
